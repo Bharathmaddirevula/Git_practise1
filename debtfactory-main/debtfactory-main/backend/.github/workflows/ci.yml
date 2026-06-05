@@ -1,0 +1,42 @@
+name: CI
+
+# Runs on every branch push (so teams get feedback the moment they push a
+# feature branch) and on PRs into main. Everything runs inside the SAME dev
+# image developers use locally — identical Python and dependency versions.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build dev image
+        run: docker compose -f compose.yaml -f compose.dev.yaml build api
+
+      - name: Lint + format + types
+        run: |
+          docker compose -f compose.yaml -f compose.dev.yaml run --rm --no-deps api \
+            bash -lc "ruff check . && black --check . && mypy src"
+
+      - name: Tests
+        run: docker compose -f compose.yaml -f compose.dev.yaml run --rm --no-deps api pytest -q
+
+      - name: Migrations (apply + idempotency check)
+        run: |
+          docker compose -f compose.yaml -f compose.dev.yaml up -d db
+          docker compose -f compose.yaml -f compose.dev.yaml run --rm api python scripts/migrate_sql.py
+          docker compose -f compose.yaml -f compose.dev.yaml run --rm api python scripts/migrate_sql.py
+          docker compose -f compose.yaml -f compose.dev.yaml run --rm api python scripts/migrate_sql.py --status
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f compose.yaml -f compose.dev.yaml down -v

@@ -1,0 +1,1888 @@
+{
+  "info": {
+    "name": "DebtFactory - Rule Engine",
+    "description": "Verified eligibility scenarios (25-col matrix, exact-match BRE flags).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Happy path",
+      "item": [
+        {
+          "name": "S01 Strict-doc applicant (car loan, ITR) - BOI/Indian/IOB group",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"BOI\", \"Indian Bank\", \"IOB\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S02 BOB group: no car loan + self-employed renting",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"BOB\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": false,\n  \"rented_house_self_employed\": true,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S03 HDFC/AXIS/Kotak group: full lenient-doc profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"HDFC\", \"AXIS\", \"Kotak\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 720,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 40,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": true,\n  \"agriculture\": true,\n  \"no_income_proof\": true,\n  \"rental_income_non_itr\": true,\n  \"rental_income_not_reflecting\": true,\n  \"itr_not_filed\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S04 BOM: PL+CC written off (car loan kept true)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"BOM\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 660,\n  \"pl_write_off\": true,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": true,\n  \"wo_amount\": 3000,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CIBIL",
+      "item": [
+        {
+          "name": "S05 CIBIL 649 - below every floor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 649,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S06 CIBIL 674 - just below 675",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 674,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S07 CIBIL 675 - BOI/IOB floor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"BOI\", \"IOB\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 675,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S08 CIBIL 724 - just below 725",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"BOI\", \"IOB\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 724,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S09 CIBIL 725 - Indian Bank floor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"BOI\", \"Indian Bank\", \"IOB\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 725,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Age",
+      "item": [
+        {
+          "name": "S10 Age 17 - below floor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 17,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S11 Age 18 - Indian Bank only",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"Indian Bank\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 18,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S12 Age 20 - below 21",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"Indian Bank\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 20,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S13 Age 21 - common floor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"BOI\", \"Indian Bank\", \"IOB\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 21,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S14 Age 70 - BOI/IOB/Indian ceiling",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"BOI\", \"Indian Bank\", \"IOB\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 70,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S15 Age 71 - above ceiling",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 71,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Write-offs",
+      "item": [
+        {
+          "name": "S16 home_loan_wo = true",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": true,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S17 consumer_loan_wo = true",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": true,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S18 agri_loan_wo = true",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": true,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S19 msme_loan_wo = true",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": true,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S20 auto_loan_wo = true",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": true,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S21 pl_write_off = true (only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": true,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S22 cc_write_off = true (only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"BOI\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": true,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "WO amount",
+      "item": [
+        {
+          "name": "S23 wo_amount 4999 - under cap",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"BOI\", \"Indian Bank\", \"IOB\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 4999,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S24 wo_amount 5000 - drops BOI",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"Indian Bank\", \"IOB\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 5000,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Account/NRI",
+      "item": [
+        {
+          "name": "S25 existing_account = false",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"IOB\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": false,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S26 nri_pio = true - drops BOI",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [\"Indian Bank\", \"IOB\"];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": true,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exp/Salary/Income",
+      "item": [
+        {
+          "name": "S27 total_experience 1 (< 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 1,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S28 current_experience 0 (< 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 0,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S29 salary_mode 'Cash'",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Cash\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S30 income 24999 (< 25000)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 24999,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "BRE flags",
+      "item": [
+        {
+          "name": "S31 existing_car_loan = false (BOI/IOB/Indian need it true)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": false,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S32 rented_house_self_employed = true (only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": true,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S33 agriculture = true (only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": true,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S34 no_income_proof = true (only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": true,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S35 itr_not_filed = true (only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "S36 rental_income_non_itr = true (only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const want = [];",
+                  "pm.test('count = ' + want.length, () => pm.expect(b.matched_rule_count).to.eql(want.length));",
+                  "pm.test('banks match', () => pm.expect(b.eligible_banks.map(x=>x.bank_name)).to.eql(want));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": true,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Validation",
+      "item": [
+        {
+          "name": "E01 Missing required field (no cibil_score)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('validation_error', () => pm.expect(pm.response.json().error.code).to.eql('validation_error'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "E02 Wrong type (age as string)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('validation_error', () => pm.expect(pm.response.json().error.code).to.eql('validation_error'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": \"thirty\",\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "E03 Unknown/extra field (extra=forbid)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('validation_error', () => pm.expect(pm.response.json().error.code).to.eql('validation_error'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cibil_score\": 750,\n  \"pl_write_off\": false,\n  \"home_loan_wo\": false,\n  \"consumer_loan_wo\": false,\n  \"agri_loan_wo\": false,\n  \"msme_loan_wo\": false,\n  \"auto_loan_wo\": false,\n  \"cc_write_off\": false,\n  \"wo_amount\": 0,\n  \"age\": 30,\n  \"existing_account\": true,\n  \"nri_pio\": false,\n  \"total_experience\": 5,\n  \"current_experience\": 2,\n  \"salary_mode\": \"Bank Credit\",\n  \"income\": 50000,\n  \"existing_car_loan\": true,\n  \"rented_house_self_employed\": false,\n  \"agriculture\": false,\n  \"no_income_proof\": false,\n  \"rental_income_non_itr\": false,\n  \"rental_income_not_reflecting\": false,\n  \"itr_not_filed\": false,\n  \"foo\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "E04 Empty body",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('validation_error', () => pm.expect(pm.response.json().error.code).to.eql('validation_error'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rule-engine/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rule-engine",
+                "evaluate"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

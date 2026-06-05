@@ -1,0 +1,1 @@
+"""Domain logs service tests."""

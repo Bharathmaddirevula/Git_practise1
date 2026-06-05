@@ -1,0 +1,26 @@
+# PR auto-labels by changed service path (used by pr-labeler.yml).
+# NOTE: not in prompt.md §4, but actions/labeler requires a config file.
+
+"service:rule-engine":
+  - changed-files:
+      - any-glob-to-any-file: ["src/app/services/rule_engine/**", "tests/services/rule_engine/**"]
+
+"service:auth":
+  - changed-files:
+      - any-glob-to-any-file: ["src/app/services/auth/**", "tests/services/auth/**"]
+
+"service:domain-logs":
+  - changed-files:
+      - any-glob-to-any-file: ["src/app/services/domain_logs/**", "tests/services/domain_logs/**"]
+
+"service:ocr-jobs":
+  - changed-files:
+      - any-glob-to-any-file: ["src/app/services/ocr_jobs/**", "tests/services/ocr_jobs/**"]
+
+"area:core":
+  - changed-files:
+      - any-glob-to-any-file: ["src/app/core/**", "src/app/common/**", "src/app/api/**"]
+
+"area:infra":
+  - changed-files:
+      - any-glob-to-any-file: ["docker/**", "compose*.yaml", ".github/**", "requirements/**"]

@@ -1,0 +1,73 @@
+# Dev override: hot reload, source bind-mounts, debug port.
+#   docker compose -f compose.yaml -f compose.dev.yaml up
+
+services:
+  api:
+    build:
+      target: dev
+    environment:
+      ENVIRONMENT: local
+      DEBUG: "true"
+      DATABASE_ECHO: "true"
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8000"
+      - --reload
+    volumes:
+      # Bind-mount source for live reload (don't shadow installed packages).
+      - ./src:/app/src
+      - ./migrations:/app/migrations
+      - ./scripts:/app/scripts
+      - ./tests:/app/tests
+    ports:
+      - "8000:8000"
+      - "5678:5678"  # debugpy
+
+  # Expose data stores to the host on conflict-free ports (host 5432 is already
+  # taken by a native Postgres; 5433/6379 are free). Lets the host venv run
+  # Alembic against the dockerized DB: postgresql+asyncpg://loan:loan@localhost:5433/loan_platform
+  db:
+    ports:
+      - "5433:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  # Web DB admin UI. In Docker Desktop, click the published 8081 port to open
+  # Adminer in the browser, then connect to the dockerized Postgres.
+  # Login: System=PostgreSQL  Server=db  User=loan  Password=loan  Database=loan_platform
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: dracula
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
+  # OCR worker shares the api image but runs the Celery worker instead.
+  worker:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+      target: dev
+    command:
+      - celery
+      - -A
+      - app.services.ocr_jobs.workers.celery_app:create_celery_app
+      - worker
+      - --loglevel=info
+    environment:
+      OCR_BROKER_URL: redis://redis:6379/0
+      OCR_RESULT_BACKEND: redis://redis:6379/1
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - redis

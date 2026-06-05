@@ -1,0 +1,6 @@
+# Auth service dependencies.
+-c ../base.txt
+passlib[argon2]>=1.7,<2.0
+pyjwt>=2.8,<3.0
+authlib>=1.3,<2.0
+email-validator>=2.1,<3.0

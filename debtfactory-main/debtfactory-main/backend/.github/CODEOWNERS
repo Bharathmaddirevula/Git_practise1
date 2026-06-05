@@ -1,0 +1,30 @@
+# Code ownership — reviews route automatically to the owning team.
+# Each service directory is owned by one sub-team; shared infra by the platform team.
+
+# Default owner for anything not matched below.
+*                                   @org/platform-team
+
+# Shared infrastructure (core, common, api wiring, build, CI).
+/src/app/core/                      @org/platform-team
+/src/app/common/                    @org/platform-team
+/src/app/api/                       @org/platform-team
+/docker/                            @org/platform-team
+/.github/                           @org/platform-team
+/migrations/env.py                  @org/platform-team
+
+# Feature services — owned by their sub-teams.
+/src/app/services/rule_engine/      @org/rule-engine-team
+/tests/services/rule_engine/        @org/rule-engine-team
+/migrations/versions/rule_engine/   @org/rule-engine-team
+
+/src/app/services/auth/             @org/auth-team
+/tests/services/auth/               @org/auth-team
+/migrations/versions/auth/          @org/auth-team
+
+/src/app/services/domain_logs/      @org/domain-logs-team
+/tests/services/domain_logs/        @org/domain-logs-team
+/migrations/versions/domain_logs/   @org/domain-logs-team
+
+/src/app/services/ocr_jobs/         @org/ocr-jobs-team
+/tests/services/ocr_jobs/           @org/ocr-jobs-team
+/migrations/versions/ocr_jobs/      @org/ocr-jobs-team

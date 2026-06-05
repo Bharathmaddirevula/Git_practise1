@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Compiled requirements lockfiles are committed; local pip artifacts are not
+pip-wheel-metadata/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Generated JDM build artifacts (source of truth is the .xlsx)
+src/app/services/rule_engine/decisions/*.jdm.json
+
+# OCR artifacts
+/var/lib/ocr-artifacts/
+
+# Editors / OS
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

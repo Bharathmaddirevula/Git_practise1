@@ -1,0 +1,93 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loan-platform-backend"
+version = "0.1.0"
+description = "Feature-sliced modular-monolith FastAPI backend for the loan platform."
+requires-python = ">=3.12,<3.13"
+readme = "README.md"
+license = { text = "Proprietary" }
+
+# Runtime deps are managed via the requirements/*.in fragments and compiled
+# lockfiles (see scripts/compile_requirements.sh), not pinned here.
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# --------------------------------------------------------------------------- #
+# Ruff — single source of lint truth (linter + import sorting).
+# --------------------------------------------------------------------------- #
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI dependency-injection markers are designed to be called in argument
+# defaults — exempt them from B008.
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Body",
+    "fastapi.Header",
+    "fastapi.Cookie",
+    "fastapi.Form",
+    "fastapi.File",
+    "fastapi.Security",
+]
+
+# --------------------------------------------------------------------------- #
+# Black — formatter, kept consistent with Ruff.
+# --------------------------------------------------------------------------- #
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+# --------------------------------------------------------------------------- #
+# Mypy — strict for application code; tests may relax.
+# --------------------------------------------------------------------------- #
+[tool.mypy]
+python_version = "3.12"
+strict = true
+mypy_path = "src"
+plugins = ["pydantic.mypy"]
+explicit_package_bases = true
+namespace_packages = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+check_untyped_defs = true
+
+# Third-party packages without type stubs.
+[[tool.mypy.overrides]]
+module = ["zen", "zen.*", "celery", "celery.*", "openpyxl", "openpyxl.*"]
+ignore_missing_imports = true
+
+# --------------------------------------------------------------------------- #
+# Pytest + coverage.
+# --------------------------------------------------------------------------- #
+[tool.pytest.ini_options]
+minversion = "8.0"
+pythonpath = ["src"]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-q --strict-markers"
+
+[tool.coverage.run]
+source = ["src/app"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+# Per-service gate is enforced in CI on changed services (>= 80%), not globally.

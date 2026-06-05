@@ -1,0 +1,6 @@
+# OCR Jobs service dependencies.
+-c ../base.txt
+celery[redis]>=5.4,<6.0
+redis>=5.0,<6.0
+pytesseract>=0.3.10,<0.4
+pillow>=10.3,<11.0

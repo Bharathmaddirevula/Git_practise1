@@ -1,0 +1,35 @@
+# Keep the build context small and reproducible.
+.git/
+.github/
+.vscode/
+.idea/
+
+# Python caches / artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# NOTE: tests/ are intentionally NOT ignored — the `dev` image stage copies them
+# so it is self-contained for CI. The `prod` stage never copies tests.
+
+# Local env / secrets
+.env
+.env.*
+!.env.example
+
+# Docs and scaffolding inputs
+docs/
+*.md
+!README.md
+prompt.md
+skill.md
+
+# Generated artifacts
+src/app/services/rule_engine/decisions/*.jdm.json
